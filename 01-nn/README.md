@@ -58,22 +58,22 @@ flowchart LR
 
 ### 1D convolution (signals)
 
-Think of a **1D signal** as a row of numbers (e.g. a waveform or a time series). The **kernel** is a shorter row. We slide the kernel along the signal and, at each position, compute the sum of (signal × kernel) over the overlap.
+Think of a **1D signal** as a row of numbers (e.g. a waveform or a time series). The **kernel** is a shorter row. We slide the kernel along the signal and, at each position, compute the sum of (signal × kernel) over the overlap.  (Normally, we need to "normalize" the result so that the average value does not increase but you get the point here for the "blurring" or "averaging" operation.)
 
-**Example — 1D:**
+**Example — 1D (blurring filter):**
 
-- **Signal:** `[1, 2, 3, 4, 5]` (length 5)
-- **Kernel:** `[1, 0, -1]` (length 3; like a simple “edge” detector: +1 on the left, -1 on the right)
+- **Signal:** `[5, 1, 4, 2, 6]` (length 5) — a varied signal with peaks and dips.
+- **Kernel:** `[1, 1, 1]` (length 3) — a **blurring** (smoothing) filter: each output is the sum of three neighboring values, so we blend nearby samples and smooth out variation.
 
 Slide the kernel one step at a time:
 
 | Position | Overlap           | Calculation              | Output |
 |----------|-------------------|--------------------------|--------|
-| 0        | signal `[1,2,3]`  | 1×1 + 2×0 + 3×(-1)       | **-2** |
-| 1        | signal `[2,3,4]`  | 2×1 + 3×0 + 4×(-1)       | **-2** |
-| 2        | signal `[3,4,5]`  | 3×1 + 4×0 + 5×(-1)       | **-2** |
+| 0        | signal `[5, 1, 4]` | 5×1 + 1×1 + 4×1          | **10** |
+| 1        | signal `[1, 4, 2]` | 1×1 + 4×1 + 2×1          | **7**  |
+| 2        | signal `[4, 2, 6]` | 4×1 + 2×1 + 6×1          | **12** |
 
-So the **output** is `[-2, -2, -2]` (length 5 − 3 + 1 = 3). At each position we did: multiply the 3 overlapping numbers by the kernel, then add. That’s **1D convolution**.
+So the **output** is `[10, 7, 12]` (length 5 − 3 + 1 = 3). At each position we did: multiply the 3 overlapping numbers by the kernel, then add. Here the kernel is all 1's, so each output is simply the **sum** of three neighbors — that's what makes it a blur: we're combining nearby values so the signal is smoother. (If we divided each sum by 3, we'd get the local **average**.) That’s **1D convolution**.
 
 **Why “convolution”?** Mathematically, this sliding multiply-and-add is the discrete convolution of the signal with the kernel. The same idea extends to 2D (images).
 
