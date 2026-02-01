@@ -13,17 +13,18 @@
 ## Table of Contents
 
 1. [What Is a Convolutional Neural Network?](#1-what-is-a-convolutional-neural-network)
-2. [Core Building Blocks](#2-core-building-blocks)
-3. [Layers, Nodes, and How Information Flows](#3-layers-nodes-and-how-information-flows)
-4. [Activation Functions](#4-activation-functions)
-5. [Pooling Layers](#5-pooling-layers)
-6. [Loss Functions](#6-loss-functions)
-7. [Optimizers](#7-optimizers)
-8. [Dropout](#8-dropout)
-9. [Normalization](#9-normalization)
-10. [The LeNet Architecture](#10-the-lenet-architecture)
-11. [The AlexNet Architecture](#11-the-alexnet-architecture)
-12. [Putting It All Together](#12-putting-it-all-together)
+2. [What Is Convolution?](#2-what-is-convolution)
+3. [Core Building Blocks](#3-core-building-blocks)
+4. [Layers, Nodes, and How Information Flows](#4-layers-nodes-and-how-information-flows)
+5. [Activation Functions](#5-activation-functions)
+6. [Pooling Layers](#6-pooling-layers)
+7. [Loss Functions](#7-loss-functions)
+8. [Optimizers](#8-optimizers)
+9. [Dropout](#9-dropout)
+10. [Normalization](#10-normalization)
+11. [The LeNet Architecture](#11-the-lenet-architecture)
+12. [The AlexNet Architecture](#12-the-alexnet-architecture)
+13. [Putting It All Together](#13-putting-it-all-together)
 
 ---
 
@@ -51,7 +52,75 @@ flowchart LR
 
 ---
 
-## 2. Core Building Blocks
+## 2. What Is Convolution?
+
+**Convolution** is the operation at the heart of a CNN: a small array of numbers (the **kernel** or **filter**) is **slid** across the input. At each position, we **multiply** the overlapping numbers **element-wise** and **add** the results. That single number is one entry in the output. Repeating this at every position where the filter fits gives the full output (a signal in 1D, a feature map in 2D).
+
+### 1D convolution (signals)
+
+Think of a **1D signal** as a row of numbers (e.g. a waveform or a time series). The **kernel** is a shorter row. We slide the kernel along the signal and, at each position, compute the sum of (signal × kernel) over the overlap.
+
+**Example — 1D:**
+
+- **Signal:** `[1, 2, 3, 4, 5]` (length 5)
+- **Kernel:** `[1, 0, -1]` (length 3; like a simple “edge” detector: +1 on the left, -1 on the right)
+
+Slide the kernel one step at a time:
+
+| Position | Overlap           | Calculation              | Output |
+|----------|-------------------|--------------------------|--------|
+| 0        | signal `[1,2,3]`  | 1×1 + 2×0 + 3×(-1)       | **-2** |
+| 1        | signal `[2,3,4]`  | 2×1 + 3×0 + 4×(-1)       | **-2** |
+| 2        | signal `[3,4,5]`  | 3×1 + 4×0 + 5×(-1)       | **-2** |
+
+So the **output** is `[-2, -2, -2]` (length 5 − 3 + 1 = 3). At each position we did: multiply the 3 overlapping numbers by the kernel, then add. That’s **1D convolution**.
+
+**Why “convolution”?** Mathematically, this sliding multiply-and-add is the discrete convolution of the signal with the kernel. The same idea extends to 2D (images).
+
+### 2D convolution (images)
+
+For an **image**, the input is a **2D grid** of numbers (or several grids—one per channel). The **kernel** is a small 2D grid (e.g. 2×2 or 3×3). We slide the kernel across the image (left-to-right, top-to-bottom). At each position, we **multiply** each image value with the kernel value that sits on top of it, then **add** all those products. One such sum = one output value.
+
+**Example — 2D:**
+
+- **Image (3×3):**
+
+  ```
+  1  2  1
+  0  1  0
+  1  2  1
+  ```
+
+- **Kernel (2×2):**
+
+  ```
+  1  0
+  0  1
+  ```
+
+There are **4 positions** where a 2×2 kernel fits in a 3×3 image (no padding). At each we do multiply-and-add:
+
+| Position   | Window from image | Calculation              | Result |
+|-----------|-------------------|---------------------------|--------|
+| Top-left  | `1 2` / `0 1`     | 1×1 + 2×0 + 0×0 + 1×1     | **2**  |
+| Top-right | `2 1` / `1 0`     | 2×1 + 1×0 + 1×0 + 0×1     | **2**  |
+| Bottom-left  | `0 1` / `1 2`  | 0×1 + 1×0 + 1×0 + 2×1     | **2**  |
+| Bottom-right | `1 0` / `2 1`  | 1×1 + 0×0 + 2×0 + 1×1     | **2**  |
+
+So the **output** is a 2×2 grid:
+
+```
+2  2
+2  2
+```
+
+That’s **2D convolution**: one number per position where the kernel fits. In a real CNN we use many kernels (filters), so we get many 2×2 grids (one “feature map” per filter). The filters are **learned** so that some respond to edges, some to textures, etc.
+
+**Summary:** Convolution = slide a kernel over the input; at each position, multiply overlapping values and add → one output value. 1D does this along a line; 2D does it over a grid. CNNs use 2D (and 3D for video) convolutions with many learned filters.
+
+---
+
+## 3. Core Building Blocks
 
 Before we look at full architectures like LeNet and AlexNet, it helps to know the main pieces:
 
@@ -101,7 +170,7 @@ flowchart TB
 
 ---
 
-## 3. Layers, Nodes, and How Information Flows
+## 4. Layers, Nodes, and How Information Flows
 
 ### What is a layer?
 
@@ -134,7 +203,7 @@ flowchart LR
 
 ---
 
-## 4. Activation Functions
+## 5. Activation Functions
 
 An **activation function** takes the number coming out of a node and changes it before passing it to the next layer. It adds **non-linearity**: without it, stacking many layers would be the same as one big linear layer, and the network couldn’t learn complex patterns.
 
@@ -167,7 +236,7 @@ flowchart LR
 
 ---
 
-## 5. Pooling Layers
+## 6. Pooling Layers
 
 After a convolution, we often use a **pooling layer** to reduce the size of the feature maps and keep the strongest responses.
 
@@ -204,7 +273,7 @@ flowchart TB
 
 ---
 
-## 6. Loss Functions
+## 7. Loss Functions
 
 The **loss function** tells the network "how wrong" its current prediction is. The optimizer then tries to **minimize** this loss by updating the weights.
 
@@ -242,7 +311,7 @@ flowchart LR
 
 ---
 
-## 7. Optimizers
+## 8. Optimizers
 
 The **optimizer** is the algorithm that **updates the network’s weights** after each batch of data. The loss tells us *how wrong* we are; the optimizer decides *how to change each weight* so that the loss goes down over time. Without an optimizer, the weights would never change and the network could not learn.
 
@@ -279,7 +348,7 @@ flowchart LR
 
 ---
 
-## 8. Dropout
+## 9. Dropout
 
 **Dropout** is a regularization technique: during training, we **randomly "turn off"** a fraction of the neurons (set their output to 0). The remaining neurons have to carry the load, so the network doesn’t rely too much on any single neuron.
 
@@ -306,7 +375,7 @@ flowchart LR
 
 ---
 
-## 9. Normalization
+## 10. Normalization
 
 **Normalization** means adjusting the values in the network so they stay in a good range (e.g., similar scale). This often makes training faster and more stable.
 
@@ -340,7 +409,7 @@ flowchart LR
 
 ---
 
-## 10. The LeNet Architecture
+## 11. The LeNet Architecture
 
 **LeNet-5** (1998) is one of the earliest successful CNNs. It was designed for recognizing **handwritten digits** (e.g., MNIST). The notebooks implement a version adapted to **CIFAR-10** (32×32 color images, 10 classes). You can follow along in `notebooks/LeNet CIFAR-10.ipynb`.
 
@@ -387,7 +456,7 @@ flowchart LR
 
 ---
 
-## 11. The AlexNet Architecture
+## 12. The AlexNet Architecture
 
 **AlexNet** (2012) helped start the modern deep-learning boom. It was trained on **ImageNet** (large images, many classes). The notebooks implement a version for **CIFAR-10**, with images resized to 227×227 to match the expected input size. You can follow along in `notebooks/AlexNet CIFAR-10.ipynb`.
 
@@ -451,7 +520,7 @@ flowchart TB
 
 ---
 
-## 12. Putting It All Together
+## 13. Putting It All Together
 
 ### Training loop (same idea in both notebooks)
 
