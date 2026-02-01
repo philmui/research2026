@@ -4,7 +4,7 @@
 
 ---
 
-**Who is this for?** This tutorial is written so that a 9th-grade student can follow along and understand the main ideas behind Convolutional Neural Networks. No advanced math is required—we use plain language and examples.
+**Who is this for?** ASDRP students in the Mui-Group for Spring 2026.
 
 **What you'll learn:** What CNNs are, how they "see" images, and how two famous architectures—**LeNet** and **AlexNet**—work. You'll also learn what layers, nodes, loss functions, dropouts, normalizations, pooling, and activations mean and why we use them.
 
