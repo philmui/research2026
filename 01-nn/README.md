@@ -135,20 +135,7 @@ Before we look at full architectures like LeNet and AlexNet, it helps to know th
 | **Dropout** | Randomly turns off some neurons during training to reduce overfitting. |
 | **Normalization** | Adjusts values so they stay in a good range for training. |
 
-### Quick example: what does a convolution do?
-
-Imagine a tiny 3×3 image and a 2×2 filter:
-
-- **Image (3×3):**  
-  `1 2 1`  
-  `0 1 0`  
-  `1 2 1`
-
-- **Filter (2×2):**  
-  `1 0`  
-  `0 1`
-
-We *slide* the filter over the image. At each position we multiply matching numbers and add them up. For example, with the filter on the top-left: (1×1 + 2×0 + 0×0 + 1×1) = 2. So one output value is 2. We do this everywhere the filter fits and get a new (smaller) grid of numbers. That grid is one "feature map." A convolution layer has many filters, so it produces many feature maps—each one can learn to detect a different pattern (edge, corner, etc.).
+Each convolution creates a "feature map." A convolution layer has many filters, so it produces many feature maps—each one can learn to detect a different pattern (edge, corner, etc.).
 
 We'll go through each building block in more detail below.
 
